@@ -26,20 +26,19 @@ const DAY = new Date().getDate();
     
     const allUpdatedRepos = allUpdatedReposResult?.data?.items
 
-    // const hasFoundTheSolution = allUpdatedRepos.some((repo) => {
-        // console.log({REPO: repo.contents_url})
+    const hasFoundTheSolution = allUpdatedRepos.some((repo) => {
+        console.log({REPO: repo.contents_url})
         // here we get the correct url from the given url, wihouth path -> root
-        const lastIndexToCut = 'https://api.github.com/repos/zJaaal/advent-2022/contents/{+path}'.lastIndexOf('/');
-        // const rootOfTheRepoURL = repo.contents_url.slice(0, lastIndexToCut);
-        const rootOfTheRepoURL = 'https://api.github.com/repos/zJaaal/advent-2022/contents/{+path}'.slice(0, lastIndexToCut);
+        const lastIndexToCut = repo.contents_url.lastIndexOf('/');
+        const rootOfTheRepoURL = repo.contents_url.slice(0, lastIndexToCut);
 
         checkForFileWeWant(rootOfTheRepoURL).then(response => {
             if(response) return true
             else return false
         });
-    // });
+    });
 
-    if(fileWeWant) {
+    if(hasFoundTheSolution) {
         // commit it
         console.log("FOUND IT: ", fileWeWant)
     }
