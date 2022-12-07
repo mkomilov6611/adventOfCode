@@ -1,81 +1,45 @@
 const fs = require('fs');
-const input = fs.readFileSync('input.txt', 'utf-8');
 
-const allLines = input.split('\n');
+const input = fs.readFileSync('./input.txt', 'utf8').trimEnd();
 
-const dirSizeMapping = {}
-const dirSubdirMapping = {}
-
-let currDir = null;
-
-allLines.forEach(line => {
-    const isCD = line.includes('$ cd')
-    const isDR = line.includes('dir ')
-    const isLS = line.includes('$ ls')
-    const isFile = !(isCD || isDR || isLS)
-
-    if(isCD) {
-        currDir = line.slice('$ cd'.length + 1, line.length);
-    }
-
-    if(isDR) {
-        if (!dirSubdirMapping[currDir]) dirSubdirMapping[currDir] = []
-        dirSubdirMapping[currDir].push(line.slice('dir'.length + 1, line.length))
-    }
-
-    if(isFile) {
-        if (!dirSizeMapping[currDir]) dirSizeMapping[currDir] = 0
-        dirSizeMapping[currDir] += Number(line.match(/\d+/));
-    }
-})
-
-const validDirs = {};
-
-function getDirTotalSize(dir) {
-        let totalDirSize = dirSizeMapping[dir] || 0; // files size
-
-        if(totalDirSize > 100000) {
-            return false
+function solve(input) {
+  const sizes = { '/': 0 };
+  const paths = ['/'];
+  const lines = input.split('\n');
+  for (let i = 1; i < lines.length; i++) {
+    const [, cmd, dir] = lines[i].split(' ');
+    if (cmd === 'ls') {
+      for (i++; i < lines.length; i++) {
+        const parts = lines[i].split(' ');
+        if (parts[0] === '$') {
+          i--;
+          break;
         }
-
-        let totalDirsAllSubsize = 0; 
-
-        const subdirs = dirSubdirMapping[dir] || [];
-        if(!subdirs.length) return totalDirSize;
-
-        const isSubdirsValid = subdirs.every(sub => {
-            const subTotalSize = getDirTotalSize(sub)
-            totalDirSize += subTotalSize;
-
-            if(subTotalSize <= 100000) {
-                validDirs[sub] = subTotalSize;
-            } else {
-                return false
-            }
-
-            if(totalDirsAllSubsize > 100000) {
-                return false
-            }
-
-            return true
-        })
-
-        if(!isSubdirsValid) {
-            return false
+        if (parts[0] !== 'dir') {
+          for (const path of paths) {
+            sizes[path] = (sizes[path] ?? 0) + +parts[0];
+          }
         }
-
-        return totalDirSize + totalDirsAllSubsize;
-}
-
-Object.keys(dirSubdirMapping).forEach(dir => {
-   const totalDirSize = getDirTotalSize(dir)
-
-    if(totalDirSize && totalDirSize <= 100000) {
-        validDirs[dir] = totalDirSize;
+      }
     } else {
-        return // no point in checking subs
+      if (dir === '..') {
+        paths.pop();
+      } else {
+        paths.push(`${paths[paths.length - 1]}${dir}/`);
+      }
     }
-})    
+  }
 
+  console.log(
+    Object.values(sizes)
+      .filter((size) => size <= 100000)
+      .reduce((acc, size) => acc + size)
+  );
 
-console.log({dirSubdirMapping, dirSizeMapping, validDirs, result: Object.values(validDirs).reduce((a,b)=> a+ b, 0)})
+  console.log(
+    Math.min(
+      ...Object.values(sizes).filter((size) => size >= sizes['/'] - 40000000)
+    )
+  );
+}
+solve(input);
