@@ -58,9 +58,6 @@ async function checkForFileWeWant(url) {
 
   return files.some((fileOrFolder) => {
     if (fileOrFolder.name.includes(DAY) && fileOrFolder.name.includes(".js")) {
-      // hmm seems like it
-      console.log({ seemsLikeIt: fileOrFolder });
-
       fileWeWant = fileOrFolder;
       return true;
     }
