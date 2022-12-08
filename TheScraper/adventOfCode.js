@@ -52,16 +52,9 @@ async function checkForFileWeWant(url) {
     console.log("ERROR: checkForFileWeWant: " + error.message);
   });
 
-  let files = [];
+  let files = filesResult?.data || filesResult;
 
-  console.log({ filesResult });
-
-  // can be weird, sometimes returns as data prop, sometimes plain files :shruggin_man:
-  if (filesResult.length) {
-    files = filesResult;
-  } else {
-    files = filesResult.data;
-  }
+  console.log({ files });
 
   return files.some((fileOrFolder) => {
     if (fileOrFolder.name.includes(DAY) && fileOrFolder.name.includes(".js")) {
